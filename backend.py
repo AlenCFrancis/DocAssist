@@ -6,20 +6,14 @@ from openai import OpenAI
 from langgraph.graph import StateGraph, END
 from pypdf import PdfReader
 
-# ==================================================
-# ENV + OPENAI CLIENT
-# ==================================================
 load_dotenv()
 
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY")
 )
 
-MODEL_NAME = "gpt-4o-mini"  # fast, cheap, reliable
+MODEL_NAME = "gpt-4o-mini"  
 
-# ==================================================
-# STATE
-# ==================================================
 class PatientState(TypedDict):
     history_text: str
     lab_text: str
@@ -27,9 +21,6 @@ class PatientState(TypedDict):
     diagnosis: str
     followup_question: str
 
-# ==================================================
-# OPENAI CALL (SAFE, CHAT-STYLE)
-# ==================================================
 def call_openai(prompt: str) -> str:
     response = client.chat.completions.create(
         model=MODEL_NAME,
@@ -52,9 +43,6 @@ def call_openai(prompt: str) -> str:
 
     return response.choices[0].message.content.strip()
 
-# ==================================================
-# GRAPH NODES
-# ==================================================
 def diagnosis_step(state: PatientState):
     convo = "\n".join(state["conversation"])
 
@@ -91,9 +79,7 @@ Do NOT conclude.
     question = call_openai(prompt)
     return {"followup_question": question}
 
-# ==================================================
-# LANGGRAPH
-# ==================================================
+
 graph = StateGraph(PatientState)
 
 graph.add_node("diagnosis_step", diagnosis_step)
@@ -105,9 +91,6 @@ graph.add_edge("followup_step", END)
 
 app = graph.compile()
 
-# ==================================================
-# PDF TEXT EXTRACTION (UNCHANGED)
-# ==================================================
 def extract_pdf_text(file):
     reader = PdfReader(file)
     text = ""
