@@ -3,14 +3,8 @@ from backend import app, extract_pdf_text
 import re
 import pandas as pd
 
-# ==================================================
-# PAGE CONFIG
-# ==================================================
 st.set_page_config(page_title="Doc Assis", layout="wide")
 
-# ==================================================
-# RESET FUNCTION
-# ==================================================
 def reset_app():
     st.session_state.chat = []
     st.session_state.history_text = ""
@@ -18,9 +12,6 @@ def reset_app():
     st.session_state.final_diagnosis = ""
     st.rerun()
 
-# ==================================================
-# SESSION STATE
-# ==================================================
 for key, default in {
     "chat": [],
     "history_text": "",
@@ -30,9 +21,6 @@ for key, default in {
     if key not in st.session_state:
         st.session_state[key] = default
 
-# ==================================================
-# CSS (BUTTON + SIDEBAR FIX)
-# ==================================================
 st.markdown("""
 <style>
 .stApp { background: #f8fafc; }
@@ -111,9 +99,6 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# ==================================================
-# HEADER + RESET BUTTON
-# ==================================================
 if st.button("🩺 Doc Assis – New Patient", use_container_width=True):
     reset_app()
 
@@ -124,9 +109,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ==================================================
-# UPLOAD SECTION
-# ==================================================
 st.markdown("<div class='card'><h3>📄 Upload Patient Records</h3></div>", unsafe_allow_html=True)
 
 c1, c2 = st.columns(2)
@@ -143,9 +125,7 @@ with c2:
         st.session_state.lab_text = extract_pdf_text(lab_pdf)
         st.success(f"Uploaded: {lab_pdf.name}")
 
-# ==================================================
-# SIDEBAR – SNAPSHOT + CHART (FIXED)
-# ==================================================
+
 if st.session_state.history_text or st.session_state.lab_text:
     st.sidebar.title("🧾 Patient Snapshot")
 
@@ -165,7 +145,7 @@ if st.session_state.history_text or st.session_state.lab_text:
         f"**Gender:** {gender or 'Not available'}"
     )
 
-    # ✅ LAB CHART (THIS WAS MISSING)
+ 
     labs = {}
     hba1c = find(r"hba1c[:\- ]+([\d.]+)")
     chol = find(r"cholesterol[:\- ]+([\d.]+)")
@@ -184,18 +164,14 @@ if st.session_state.history_text or st.session_state.lab_text:
         df = pd.DataFrame(labs.values(), index=labs.keys(), columns=["Value"])
         st.sidebar.bar_chart(df)
 
-# ==================================================
-# CHAT SECTION
-# ==================================================
+
 st.markdown("<div class='card'><h3>💬 Clinical Conversation</h3></div>", unsafe_allow_html=True)
 
 for msg in st.session_state.chat:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# ==================================================
-# CHAT INPUT
-# ==================================================
+
 user_input = st.chat_input("Describe symptoms or answer follow-up questions")
 
 if user_input:
@@ -222,9 +198,6 @@ if user_input:
 
     st.rerun()
 
-# ==================================================
-# FINAL DIAGNOSIS
-# ==================================================
 if st.session_state.final_diagnosis:
     st.markdown(
         f"""
